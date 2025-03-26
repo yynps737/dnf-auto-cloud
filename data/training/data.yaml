@@ -1,16 +1,12 @@
 path: /workspace/dnf-auto-cloud/data/training
-train: /workspace/dnf-auto-cloud/data/training/images/train
-val: /workspace/dnf-auto-cloud/data/training/images/val
-test: /workspace/dnf-auto-cloud/data/training/images/test
-nc: 10
-names:
-- monster
-- boss
-- door
-- item
-- npc
-- player
-- hp_bar
-- mp_bar
-- skill_ready
-- cooldown
+train: images/train
+val: images/val
+test: images/test
+nc: 15
+names: ['door_boss', 'door_boss_activated', 'door_normal', 'door_normal_activated', 'item_diamondcoin_advanced', 'item_gold', 'monster_hebron_archer', 'monster_hebron_boss', 'monster_hebron_bulbhead', 'monster_hebron_robot', 'monster_hebron_stone', 'monster_hebron_tortoise', 'player_spectre', 'window_continue', 'window_result']
+roboflow:
+  workspace: atomade
+  project: dnf-fzffw
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/atomade/dnf-fzffw/dataset/1
