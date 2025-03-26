@@ -1,0 +1,16 @@
+path: data/training
+train: data/training/images/train
+val: data/training/images/val
+test: data/training/images/test
+nc: 10
+names:
+- monster
+- boss
+- door
+- item
+- npc
+- player
+- hp_bar
+- mp_bar
+- skill_ready
+- cooldown

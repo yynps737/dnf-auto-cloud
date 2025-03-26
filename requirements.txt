@@ -1,0 +1,29 @@
+# 基础依赖
+fastapi>=0.95.0
+uvicorn>=0.21.1
+websockets>=11.0.2
+pydantic>=1.10.7
+pillow>=9.5.0
+numpy>=1.24.3
+python-multipart>=0.0.6
+pyyaml>=6.0
+
+# 深度学习相关
+torch>=2.0.0
+torchvision>=0.15.1
+
+# 图像处理
+opencv-python>=4.7.0.72
+matplotlib>=3.7.1
+
+# 安全相关
+cryptography>=40.0.2
+python-jose>=3.3.0
+passlib>=1.7.4
+
+# 工具库
+rich>=13.3.5
+typer>=0.9.0
+
+# Linux特定依赖
+# 无需pywin32或其他Windows特有库
