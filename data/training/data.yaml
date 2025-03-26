@@ -1,7 +1,7 @@
-path: data/training
-train: data/training/images/train
-val: data/training/images/val
-test: data/training/images/test
+path: /workspace/dnf-auto-cloud/data/training
+train: /workspace/dnf-auto-cloud/data/training/images/train
+val: /workspace/dnf-auto-cloud/data/training/images/val
+test: /workspace/dnf-auto-cloud/data/training/images/test
 nc: 10
 names:
 - monster

@@ -9,7 +9,7 @@ import os
 import sys
 import time
 import json
-import yaml  # 新增导入
+import yaml
 import argparse
 import logging
 import random
@@ -215,12 +215,15 @@ class DNFDataCollector:
         return count
     
     def create_dataset_config(self):
-        """创建YOLO数据集配置文件"""
+        """创建YOLO数据集配置文件（修复版）"""
         data_yaml_path = self.output_dir / "data.yaml"
         
-        # 数据集配置
+        # 使用绝对路径
+        abs_data_dir = self.output_dir.absolute()
+        
+        # 确保路径正确，YOLOv5期望的格式
         data_config = {
-            "path": str(self.output_dir.absolute()),
+            "path": str(abs_data_dir),
             "train": str((self.images_dir / "train").absolute()),
             "val": str((self.images_dir / "val").absolute()),
             "test": str((self.images_dir / "test").absolute()),

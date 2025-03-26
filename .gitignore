@@ -1,5 +1,4 @@
-# 创建.gitignore文件排除不需要的文件
-cat > .gitignore << EOF
+# Python缓存文件
 __pycache__/
 *.py[cod]
 *$py.class
@@ -7,17 +6,23 @@ __pycache__/
 .env
 venv/
 ENV/
+
+# 编辑器配置
 .vscode/
 .idea/
+
+# 日志和模型文件
 *.log
 *.pt
 *.pth
+logs/
+
+# 训练数据（避免上传大量图像）
 data/training/images/*
 data/training/labels/*
 !data/training/images/.gitkeep
 !data/training/labels/.gitkeep
-EOF
 
-# 确保创建空目录占位符
-mkdir -p data/training/images data/training/labels
-touch data/training/images/.gitkeep data/training/labels/.gitkeep
+# 系统文件
+.DS_Store
+Thumbs.db

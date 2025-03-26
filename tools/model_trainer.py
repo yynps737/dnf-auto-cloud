@@ -37,7 +37,7 @@ class YOLOTrainer:
         self.config = self.load_config()
         
         # YOLO仓库路径
-        self.yolo_repo = Path(self.config.get("yolo_repo", "yolov5"))
+        self.yolo_repo = Path(self.config.get("yolo_repo", "tools/yolov5"))
         
         # 检查配置
         self.validate_config()
@@ -82,44 +82,24 @@ class YOLOTrainer:
             logger.error(f"数据目录不存在: {data_dir}")
             return False
         
-        # 创建YOLO数据配置
-        data_yaml_path = data_dir / "data.yaml"
+        # 验证数据目录结构
+        images_dir = data_dir / "images"
+        train_dir = images_dir / "train"
+        val_dir = images_dir / "val"
+        
+        if not train_dir.exists() or not val_dir.exists():
+            logger.warning(f"训练/验证目录不存在: {train_dir} / {val_dir}")
+            logger.warning("请先运行 data_collector.py 生成训练数据")
+            return False
         
         # 统计图像数量
-        images_dir = data_dir / "images"
-        train_images = list((images_dir / "train").glob("*.jpg"))
-        val_images = list((images_dir / "val").glob("*.jpg"))
+        train_images = list(train_dir.glob("*.jpg"))
+        val_images = list(val_dir.glob("*.jpg"))
         
-        if not train_images:
-            logger.warning(f"没有找到训练图像: {images_dir / 'train'}")
-        
-        if not val_images:
-            logger.warning(f"没有找到验证图像: {images_dir / 'val'}")
-        
-        # 获取类别
-        classes = self.config.get("classes", [
-            "monster", "boss", "door", "item", "npc", "player", 
-            "hp_bar", "mp_bar", "skill_ready", "cooldown"
-        ])
-        
-        # 创建数据配置文件
-        data_config = {
-            "path": str(data_dir),
-            "train": str(images_dir / "train"),
-            "val": str(images_dir / "val"),
-            "test": str(images_dir / "test"),
-            "nc": len(classes),
-            "names": classes
-        }
-        
-        # 保存配置
-        with open(data_yaml_path, "w", encoding="utf-8") as f:
-            yaml.dump(data_config, f, default_flow_style=False, sort_keys=False)
-        
-        logger.info(f"已创建数据配置: {data_yaml_path}")
+        logger.info(f"已创建数据配置: {data_dir / 'data.yaml'}")
         logger.info(f"训练图像: {len(train_images)}, 验证图像: {len(val_images)}")
         
-        return True
+        return len(train_images) > 0 and len(val_images) > 0
     
     def clone_yolo_repo(self):
         """克隆YOLOv5仓库"""
