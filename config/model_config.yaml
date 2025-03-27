@@ -1,7 +1,7 @@
 # YOLO模型训练配置
 
 # 数据配置
-data_dir: "data/training"
+data_dir: "/workspace/dnf-auto-cloud/data/training"  # 更新为您的实际路径
 weights_dir: "models/weights"
 
 # 训练参数
@@ -13,21 +13,13 @@ cache: true
 device: "0"  # 使用第一个GPU，多GPU用 "0,1,2,3"
 
 # 模型配置
-pretrained: "yolov5m.pt"  # 预训练权重
-yolo_repo: "tools/yolov5"  # YOLOv5仓库路径
+pretrained: "yolov8m.pt"  # 预训练权重
 
-# 类别定义
-classes:
-  - "monster"     # 怪物
-  - "boss"        # Boss
-  - "door"        # 门
-  - "item"        # 物品
-  - "npc"         # NPC
-  - "player"      # 玩家
-  - "hp_bar"      # 生命条
-  - "mp_bar"      # 魔法条
-  - "skill_ready" # 技能就绪
-  - "cooldown"    # 技能冷却
+# 类别定义 (无需修改，因为您的data.yaml已定义)
+# classes:
+#  - "door_boss"
+#  - "door_boss_activated"
+#  - 等...
 
 # 增强设置
 augmentation:

@@ -3,8 +3,7 @@
 
 """
 YOLO模型实现，负责目标检测和识别
-支持多种YOLO版本：YOLOv5、YOLOv8
-优化版 - 支持GPU加速和模型优化
+专用于YOLOv8，具有优化的性能和准确性
 """
 
 import os
@@ -24,7 +23,7 @@ from config.settings import MODEL
 logger = logging.getLogger("DNFAutoCloud")
 
 class YOLOModel:
-    """YOLO模型类 - 优化版"""
+    """YOLOv8模型类 - 优化版"""
     
     def __init__(self):
         """初始化YOLO模型"""
@@ -74,7 +73,7 @@ class YOLOModel:
             return [f"class_{i}" for i in range(10)]  # 默认类别名
     
     def _initialize_model(self):
-        """初始化YOLO模型"""
+        """初始化YOLOv8模型"""
         try:
             # 获取模型路径
             weights_path = MODEL.get("weights", "")
@@ -84,7 +83,7 @@ class YOLOModel:
             if not os.path.exists(weights_path):
                 raise FileNotFoundError(f"模型权重文件不存在: {weights_path}")
             
-            logger.info(f"正在加载YOLO模型: {weights_path}")
+            logger.info(f"正在加载YOLOv8模型: {weights_path}")
             
             # 确定模型引擎类型
             engine = MODEL.get("engine", "pytorch").lower()
@@ -96,17 +95,17 @@ class YOLOModel:
                 
                 self._initialize_onnx_model(weights_path)
             else:
-                # 默认使用PyTorch模型
+                # 使用PyTorch模型
                 self._initialize_pytorch_model(weights_path)
             
-            logger.info(f"YOLO模型加载成功，运行于 {self.device} 设备")
+            logger.info(f"YOLOv8模型加载成功，运行于 {self.device} 设备")
             
         except Exception as e:
-            logger.error(f"初始化YOLO模型失败: {e}")
+            logger.error(f"初始化YOLOv8模型失败: {e}")
             raise
     
     def _initialize_pytorch_model(self, weights_path):
-        """初始化PyTorch YOLO模型"""
+        """初始化PyTorch YOLOv8模型"""
         try:
             # 检查设备可用性
             if self.device.startswith("cuda") and not torch.cuda.is_available():
@@ -117,48 +116,19 @@ class YOLOModel:
             # 设置设备
             device = torch.device(self.device)
             
-            # 确定YOLO版本并加载
-            model_name = MODEL.get("name", "").lower()
-            
-            if "yolov8" in model_name or weights_path.endswith("v8.pt"):
-                # YOLOv8
-                try:
-                    from ultralytics import YOLO
-                    self.model = YOLO(weights_path)
-                    self.model_type = "yolov8"
-                    logger.info("已加载YOLOv8模型")
-                except ImportError:
-                    logger.error("无法导入ultralytics，请安装: pip install ultralytics")
-                    raise
-            else:
-                # YOLOv5（默认）
-                try:
-                    sys.path.append(os.path.join(os.path.dirname(__file__), "../tools/yolov5"))
-                    import torch
-                    
-                    # 加载模型
-                    self.model = torch.hub.load('ultralytics/yolov5', 'custom', 
-                                              path=weights_path, device=device)
-                    
-                    # 设置参数
-                    self.model.conf = self.conf_threshold
-                    self.model.iou = self.iou_threshold
-                    self.model.classes = None  # 检测所有类别
-                    self.model.max_det = 100   # 最大检测数量
-                    
-                    # 如果启用半精度且支持
-                    if self.half_precision and self.device != "cpu":
-                        self.model.half()
-                    
-                    self.model_type = "yolov5"
-                    logger.info("已加载YOLOv5模型")
-                    
-                except ImportError:
-                    logger.error("无法导入torch或YOLOv5，请确保已正确安装")
-                    raise
-                except Exception as e:
-                    logger.error(f"加载YOLOv5模型时出错: {e}")
-                    raise
+            # 加载YOLOv8模型
+            try:
+                from ultralytics import YOLO
+                self.model = YOLO(weights_path)
+                
+                # 将模型设置为推理模式并移至指定设备
+                self.model.to(device)
+                self.model_type = "yolov8"
+                
+                logger.info("已加载YOLOv8模型")
+            except ImportError:
+                logger.error("无法导入ultralytics，请安装: pip install ultralytics")
+                raise
             
             # 预热模型
             self._warmup_model()
@@ -168,7 +138,7 @@ class YOLOModel:
             raise
     
     def _initialize_onnx_model(self, weights_path):
-        """初始化ONNX YOLO模型"""
+        """初始化ONNX YOLOv8模型"""
         try:
             import onnxruntime as ort
             
@@ -211,18 +181,9 @@ class YOLOModel:
         try:
             logger.info("预热模型...")
             
-            if self.model_type == "yolov8":
-                # YOLOv8预热
-                dummy_image = np.random.randint(0, 255, (self.img_size, self.img_size, 3), dtype=np.uint8)
-                self.model(dummy_image, verbose=False)
-                
-            elif self.model_type == "yolov5":
-                # YOLOv5预热
-                dummy_image = torch.zeros((1, 3, self.img_size, self.img_size), device=self.device)
-                if self.half_precision and self.device != "cpu":
-                    dummy_image = dummy_image.half()
-                
-                self.model(dummy_image)
+            # YOLOv8预热
+            dummy_image = np.random.randint(0, 255, (self.img_size, self.img_size, 3), dtype=np.uint8)
+            self.model(dummy_image, verbose=False)
             
             logger.info("模型预热完成")
             
@@ -250,8 +211,6 @@ class YOLOModel:
             # 选择相应的检测方法
             if self.model_type == "yolov8":
                 detections = self._detect_yolov8(image)
-            elif self.model_type == "yolov5":
-                detections = self._detect_yolov5(image)
             elif self.model_type == "onnx":
                 detections = self._detect_onnx(image)
             else:
@@ -267,41 +226,6 @@ class YOLOModel:
         except Exception as e:
             logger.error(f"目标检测出错: {e}")
             return []
-    
-    def _detect_yolov5(self, image):
-        """使用YOLOv5模型进行检测"""
-        # 转换PIL图像为所需格式
-        if isinstance(image, Image.Image):
-            # PIL图像直接传给模型
-            results = self.model(image, size=self.img_size)
-        else:
-            # 转换numpy数组为PIL图像
-            image = Image.fromarray(np.array(image))
-            results = self.model(image, size=self.img_size)
-        
-        # 提取结果
-        predictions = results.xyxy[0].cpu().numpy()  # xyxy格式，(n, 6) - x1, y1, x2, y2, conf, cls
-        
-        # 转换为标准格式
-        detections = []
-        for pred in predictions:
-            x1, y1, x2, y2, conf, cls_id = pred
-            cls_id = int(cls_id)
-            
-            # 确保类别ID在范围内
-            if cls_id < len(self.class_names):
-                class_name = self.class_names[cls_id]
-            else:
-                class_name = f"class_{cls_id}"
-            
-            detections.append({
-                "bbox": [float(x1), float(y1), float(x2), float(y2)],
-                "confidence": float(conf),
-                "class_id": cls_id,
-                "class_name": class_name
-            })
-        
-        return detections
     
     def _detect_yolov8(self, image):
         """使用YOLOv8模型进行检测"""

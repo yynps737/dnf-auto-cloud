@@ -11,6 +11,7 @@ pyyaml>=6.0
 # 深度学习相关
 torch>=2.0.0
 torchvision>=0.15.1
+ultralytics>=8.0.0  # YOLOv8依赖
 
 # 图像处理
 opencv-python>=4.7.0.72
@@ -25,5 +26,8 @@ passlib>=1.7.4
 rich>=13.3.5
 typer>=0.9.0
 
-# Linux特定依赖
-# 无需pywin32或其他Windows特有库
+# Windows特定依赖 (仅客户端需要)
+pywin32>=306; sys_platform == 'win32'
+keyboard>=0.13.5; sys_platform == 'win32'
+mouse>=0.7.1; sys_platform == 'win32'
+mss>=9.0.1; sys_platform == 'win32'
